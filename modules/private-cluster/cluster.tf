@@ -613,18 +613,12 @@ resource "google_container_node_pool" "pools" {
     }
 
 
-    dynamic "linux_node_config" {
-      for_each = length(merge(
+    linux_node_config {
+      sysctls     = merge(
         local.node_pools_linux_node_configs_sysctls["all"],
         local.node_pools_linux_node_configs_sysctls[each.value["name"]]
-      )) != 0 ? [1] : []
-
-      content {
-        sysctls = merge(
-          local.node_pools_linux_node_configs_sysctls["all"],
-          local.node_pools_linux_node_configs_sysctls[each.value["name"]]
-        )
-      }
+      )
+      cgroup_mode = lookup(each.value, "cgroup_mode", "CGROUP_MODE_UNSPECIFIED")
     }
 
     boot_disk_kms_key = lookup(each.value, "boot_disk_kms_key", "")
